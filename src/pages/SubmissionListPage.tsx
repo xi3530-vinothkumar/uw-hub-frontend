@@ -111,9 +111,9 @@ export default function SubmissionListPage() {
                         <StatusBadge status={s.status} />
                       </td>
                       <td className="px-5 py-3.5">
-                        {s.band ? (
+                        {s.recommendation ? (
                           <BandBadge
-                            band={s.band}
+                            band={s.recommendation}
                             score={s.compositeScore ?? undefined}
                           />
                         ) : (

@@ -136,7 +136,7 @@ export default function SubmissionDetailPage() {
             <StatusBadge status={submission.status} />
             {submission.currentDecision && (
               <BandBadge
-                band={submission.currentDecision.band}
+                band={submission.currentDecision.recommendation}
                 score={submission.currentDecision.compositeScore}
               />
             )}
@@ -235,7 +235,7 @@ export default function SubmissionDetailPage() {
                     </span>
                     <div>
                       <p className="text-xs font-medium text-uw-text">{ev.eventType}</p>
-                      <p className="text-2xs text-uw-muted mt-0.5">{ev.description}</p>
+                      <p className="text-2xs text-uw-muted mt-0.5">{ev.detail ?? ev.eventType}</p>
                     </div>
                   </div>
                 ))

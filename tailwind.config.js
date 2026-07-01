@@ -35,6 +35,13 @@ export default {
       animation: {
         'spin-slow': 'spin 2s linear infinite',
         'pulse-soft': 'pulse 3s ease-in-out infinite',
+        'slide-in': 'slideIn 0.25s ease-out both',
+      },
+      keyframes: {
+        slideIn: {
+          '0%': { opacity: '0', transform: 'translateX(8px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
       },
       boxShadow: {
         'uw-card': '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(42,58,82,0.6)',

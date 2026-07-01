@@ -36,50 +36,82 @@ export interface CopeFact {
   overridden: boolean
 }
 
-export interface ScoringFactor {
+export interface AuditEntry {
+  id: string
   factor: string
-  weight: number
-  rawScore: number
-  weightedScore: number
-  notes: string | null
+  impact: string
+  explanation: string
 }
 
 export interface Decision {
   id: string
-  band: Band
-  compositeScore: number
-  narrative: string | null
-  pricingGuidance: string | null
+  version: number
   isCurrent: boolean
+  compositeScore: number
+  recommendation: Band
+  narrative: string | null
+  narrativeSource: string | null   // "llm" | "template"
+  pricingGuidance: string | null
+  exposureFlags: string | null     // comma-separated or JSON string from backend
+  reviewStatus: string | null      // "AI_PROPOSED" | "HUMAN_APPROVED"
+  approvedBy: string | null
+  approvedAt: string | null
   createdAt: string
-  factors: ScoringFactor[]
-  exposureFlags: string[]
+  auditEntries: AuditEntry[]
+}
+
+
+export interface PerilExposure {
+  id: string
+  peril: string        // "flood" | "earthquake" | "hurricane" | "wildfire"
+  severity: string     // "LOW" | "MODERATE" | "HIGH" | "CRITICAL" | "UNAVAILABLE"
+  score: number
+  rationale: string | null
+  source: string       // "FEMA NFHL" | "USGS" | "mocked" | "unavailable"
+  isSecondary: boolean
+}
+
+export interface PhotoResult {
+  id: string
+  filename: string
+  conditionScore: number | null    // 0–100
+  findings: string[]
+  failed: boolean
+  thumbnailUrl: string | null
 }
 
 export interface SubmissionEvent {
   id: string
+  taskId: string | null
   eventType: string
-  description: string
+  status: string | null
+  actor: string | null
+  detail: string | null
+  errorMessage: string | null
   createdAt: string
-  metadata: Record<string, unknown> | null
 }
 
 export interface Submission {
   id: string
   status: SubmissionStatus
   rawText: string | null
+  failureReason: string | null
+  lastActivityAt: string | null
   createdAt: string
   updatedAt: string
-  profile: CopeFact[] | null
-  currentDecision: Decision | null
-  photoCount: number
   expressPath: boolean
+  copeProfile: CopeFact[] | null
+  currentDecision: Decision | null
+  events: SubmissionEvent[] | null
+  // Enrichment data returned as part of submission detail
+  perilExposures: PerilExposure[] | null
+  photoResults: PhotoResult[] | null
 }
 
 export interface SubmissionSummary {
   id: string
   status: SubmissionStatus
-  band: Band | null
+  recommendation: Band | null
   compositeScore: number | null
   createdAt: string
   expressPath: boolean
@@ -118,6 +150,16 @@ export async function listSubmissions(): Promise<SubmissionSummary[]> {
 
 export async function getEvents(id: string): Promise<SubmissionEvent[]> {
   const res = await api.get<SubmissionEvent[]>(`/submissions/${id}/events`)
+  return res.data
+}
+
+export async function getPerilExposures(id: string): Promise<PerilExposure[]> {
+  const res = await api.get<PerilExposure[]>(`/submissions/${id}/perils`)
+  return res.data
+}
+
+export async function getPhotoResults(id: string): Promise<PhotoResult[]> {
+  const res = await api.get<PhotoResult[]>(`/submissions/${id}/photos`)
   return res.data
 }
 
