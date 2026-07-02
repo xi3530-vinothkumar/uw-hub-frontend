@@ -26,7 +26,7 @@ export type SubmissionStatus =
   | 'FAILED_ENRICHMENT'
   | 'FAILED_SCORING'
 
-export type Band = 'ACCEPT' | 'REFER' | 'DECLINE'
+export type Band = 'Accept' | 'Refer' | 'Decline' | 'ACCEPT' | 'REFER' | 'DECLINE'
 
 export interface CopeFact {
   fieldName: string
@@ -169,6 +169,23 @@ export async function extractSubmission(id: string): Promise<void> {
 
 export async function evaluateSubmission(id: string): Promise<void> {
   await api.post(`/submissions/${id}/evaluate`)
+}
+
+/**
+ * Confirm COPE review and advance the submission to enrichment.
+ *
+ * This is the step-by-step path: POST /submissions/{id}/enrich calls
+ * republishPendingTask on the orchestrator which, for a submission in
+ * EXTRACTED state, calls skipReview to transition it to REVIEWED and
+ * immediately starts peril enrichment. Use this from the CopeReviewPage
+ * "Confirm & Continue" action.
+ *
+ * Do NOT use evaluateSubmission() here — that endpoint (POST /evaluate)
+ * calls evaluateExpress() which expects DRAFT status and starts the full
+ * express pipeline from scratch.
+ */
+export async function confirmCOPEReview(id: string): Promise<void> {
+  await api.post(`/submissions/${id}/enrich`)
 }
 
 export async function patchProfile(

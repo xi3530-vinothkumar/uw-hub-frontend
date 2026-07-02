@@ -6,10 +6,10 @@ import type { PerilExposure } from '../api/client'
 // ──────────────────────────────────────────────
 
 const PERIL_META: Record<string, { label: string; icon: string }> = {
-  flood:      { label: 'Flood',      icon: '🌊' },
-  earthquake: { label: 'Earthquake', icon: '🏔️' },
-  hurricane:  { label: 'Hurricane',  icon: '🌀' },
-  wildfire:   { label: 'Wildfire',   icon: '🔥' },
+  flood:      { label: 'FLOOD',      icon: '🌊' },
+  earthquake: { label: 'EARTHQUAKE', icon: '🏔️' },
+  hurricane:  { label: 'HURRICANE',  icon: '🌀' },
+  wildfire:   { label: 'WILDFIRE',   icon: '🔥' },
 }
 
 // ──────────────────────────────────────────────
@@ -77,7 +77,7 @@ export default function PerilCard({ exposure, className }: Props) {
               {meta.icon}
             </span>
             <div>
-              <p className="text-xs font-semibold text-uw-text tracking-wide uppercase">
+              <p className="text-xs font-semibold text-uw-text tracking-wide">
                 {meta.label}
               </p>
               {!isUnavailable && (
