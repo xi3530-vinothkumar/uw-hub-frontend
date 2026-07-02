@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Upload, X, AlertCircle, FileImage, Zap, ArrowRight } from 'lucide-react'
-import { createSubmission } from '../api/client'
+import { createSubmission, evaluateSubmission, extractSubmission } from '../api/client'
 import AppShell from '../components/AppShell'
 import { cn } from '../lib/utils'
 
@@ -73,6 +73,11 @@ export default function IntakePage() {
     setSubmitError(null)
     try {
       const submission = await createSubmission(rawText, expressPath, photos)
+      if (expressPath) {
+        await evaluateSubmission(submission.id)
+      } else {
+        await extractSubmission(submission.id)
+      }
       navigate(`/submissions/${submission.id}`)
     } catch (err: unknown) {
       const msg =
