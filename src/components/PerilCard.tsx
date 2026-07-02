@@ -31,9 +31,15 @@ const SEVERITY_STYLES: Record<Severity, {
   UNAVAILABLE: { bar: 'bg-uw-border',    badge: 'bg-uw-border/60 text-uw-muted ring-1 ring-uw-border',           border: 'border-uw-border',       label: 'Unavailable' },
 }
 
+const SEVERITY_ALIAS: Record<string, Severity> = {
+  SEVERE:  'CRITICAL',
+  MINIMAL: 'LOW',
+}
+
 function normalizeSeverity(s: string): Severity {
-  const upper = s.toUpperCase() as Severity
-  return Object.keys(SEVERITY_STYLES).includes(upper) ? upper : 'UNAVAILABLE'
+  const upper = s.toUpperCase()
+  if (Object.keys(SEVERITY_STYLES).includes(upper)) return upper as Severity
+  return SEVERITY_ALIAS[upper] ?? 'UNAVAILABLE'
 }
 
 // ──────────────────────────────────────────────
