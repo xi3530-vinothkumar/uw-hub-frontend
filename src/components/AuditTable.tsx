@@ -10,9 +10,15 @@ import type { AuditEntry } from '../api/client'
 type SortKey = 'factor' | 'impact' | 'explanation'
 type SortDir = 'asc' | 'desc'
 
+interface ExposureFlag {
+  code: string
+  severity: 'info' | 'warning' | 'error'
+  message: string
+}
+
 interface Props {
   entries: AuditEntry[]
-  exposureFlags?: string | null   // comma-separated string from backend
+  exposureFlags?: string | null
   className?: string
 }
 
@@ -31,24 +37,51 @@ function isGate(entry: AuditEntry): boolean {
   )
 }
 
-/** Parse exposure flags from the comma-separated or JSON string the backend returns. */
-function parseFlags(raw: string | null | undefined): string[] {
+const SEVERITY_CHIP: Record<ExposureFlag['severity'], string> = {
+  info:    'bg-blue-900/30 text-blue-300 ring-1 ring-blue-700/40',
+  warning: 'bg-amber-900/30 text-amber-300 ring-1 ring-amber-700/40',
+  error:   'bg-red-900/30 text-red-300 ring-1 ring-red-700/40',
+}
+
+const SEVERITY_DOT: Record<ExposureFlag['severity'], string> = {
+  info:    'bg-blue-400',
+  warning: 'bg-amber-400',
+  error:   'bg-red-400',
+}
+
+/**
+ * Parse exposure flags from the JSON string the backend returns.
+ * Handles both the new structured format `[{code, severity, message}]`
+ * and legacy plain-string arrays.
+ */
+function parseFlags(raw: string | null | undefined): ExposureFlag[] {
   if (!raw) return []
   const trimmed = raw.trim()
-  // Try JSON array
   if (trimmed.startsWith('[')) {
     try {
       const parsed = JSON.parse(trimmed)
-      if (Array.isArray(parsed)) return parsed.map(String)
+      if (Array.isArray(parsed)) {
+        // Structured format: [{code, severity, message}]
+        if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0] !== null) {
+          return parsed as ExposureFlag[]
+        }
+        // Legacy: plain string array → treat all as warnings
+        return (parsed as string[]).map((s, i) => ({
+          code: `FLAG_${i}`,
+          severity: 'warning' as const,
+          message: String(s),
+        }))
+      }
     } catch {
       // fall through
     }
   }
-  // Comma-separated
+  // Comma-separated legacy fallback
   return trimmed
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
+    .map((s, i) => ({ code: `FLAG_${i}`, severity: 'warning' as const, message: s }))
 }
 
 function impactColor(impact: string): string {
@@ -109,11 +142,14 @@ export default function AuditTable({ entries, exposureFlags, className }: Props)
         <div className="flex flex-wrap gap-1.5">
           {flags.map((flag) => (
             <span
-              key={flag}
-              className="inline-flex items-center gap-1 text-2xs font-medium bg-amber-900/30 text-amber-300 ring-1 ring-amber-700/40 rounded-full px-2 py-0.5"
+              key={flag.code}
+              className={cn(
+                'inline-flex items-center gap-1 text-2xs font-medium rounded-full px-2 py-0.5',
+                SEVERITY_CHIP[flag.severity] ?? SEVERITY_CHIP.warning,
+              )}
             >
-              <span className="h-1 w-1 rounded-full bg-amber-400 shrink-0" />
-              {flag}
+              <span className={cn('h-1 w-1 rounded-full shrink-0', SEVERITY_DOT[flag.severity] ?? SEVERITY_DOT.warning)} />
+              {flag.message}
             </span>
           ))}
         </div>

@@ -29,7 +29,7 @@ export function statusLabel(status: SubmissionStatus): string {
   const map: Record<SubmissionStatus, string> = {
     CREATED: 'Created',
     PROCESSING: 'Processing',
-    EXTRACTED: 'Extracted',
+    EXTRACTED: 'Draft Review Pending',
     REVIEWED: 'Reviewed',
     ENRICHED: 'Enriched',
     SCORED: 'Scored',
