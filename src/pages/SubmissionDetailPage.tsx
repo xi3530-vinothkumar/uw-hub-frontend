@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import {
   CheckCircle2,
   Circle,
@@ -75,20 +75,29 @@ function getStepState(
 export default function SubmissionDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const { data: submission, isLoading, isError } = useSubmission(id)
   const { data: events } = useEvents(id)
   const [showEvents, setShowEvents] = useState(false)
 
-  // Auto-redirect on key status changes
+  // fromReview: user just confirmed COPE review — still EXTRACTED but intentionally
+  // on the stepper, so suppress the redirect back to /review.
+  // skipRedirect: user clicked "Back to pipeline" from /review or /dossier — they
+  // explicitly want to see the stepper, so suppress all auto-redirects.
+  const locState = location.state as { fromReview?: boolean; skipRedirect?: boolean } | null
+  const fromReview = locState?.fromReview === true
+  const skipRedirect = locState?.skipRedirect === true
+
+  // Auto-redirect on key status changes (suppressed when user navigates back intentionally)
   useEffect(() => {
-    if (!submission) return
+    if (!submission || skipRedirect) return
     const { status, expressPath } = submission
-    if (status === 'EXTRACTED' && !expressPath) {
+    if (status === 'EXTRACTED' && !expressPath && !fromReview) {
       navigate(`/submissions/${id}/review`)
     } else if (status === 'DECIDED' || status === 'APPROVED') {
       navigate(`/submissions/${id}/dossier`)
     }
-  }, [submission, id, navigate])
+  }, [submission, id, navigate, fromReview, skipRedirect])
 
   if (isLoading) {
     return (

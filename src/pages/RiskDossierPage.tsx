@@ -106,6 +106,7 @@ export default function RiskDossierPage() {
         <div>
           <Link
             to={`/submissions/${id}`}
+            state={{ skipRedirect: true }}
             className="inline-flex items-center gap-1 text-xs text-uw-muted hover:text-uw-text mb-4 transition-colors"
           >
             <ChevronLeft size={13} /> Back to pipeline
@@ -275,17 +276,18 @@ function DecisionColumn({ decision }: { decision: Decision }) {
   const score = decision.compositeScore
   const band = decision.recommendation
 
+  const bandUpper = band.toUpperCase()
   const barColor =
-    band === 'ACCEPT'
+    bandUpper === 'ACCEPT'
       ? 'bg-emerald-500'
-      : band === 'REFER'
+      : bandUpper === 'REFER'
       ? 'bg-amber-400'
       : 'bg-red-500'
 
   const barTrack =
-    band === 'ACCEPT'
+    bandUpper === 'ACCEPT'
       ? 'bg-emerald-900/30'
-      : band === 'REFER'
+      : bandUpper === 'REFER'
       ? 'bg-amber-900/30'
       : 'bg-red-900/30'
 

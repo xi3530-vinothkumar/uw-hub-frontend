@@ -15,7 +15,7 @@ import {
   Info,
 } from 'lucide-react'
 import { useSubmission } from '../hooks/useSubmission'
-import { patchProfile, evaluateSubmission } from '../api/client'
+import { patchProfile, confirmCOPEReview } from '../api/client'
 import AppShell from '../components/AppShell'
 import StatusBadge from '../components/StatusBadge'
 import CopeFieldRow from '../components/CopeFieldRow'
@@ -178,8 +178,10 @@ export default function CopeReviewPage() {
     setProceeding(true)
     setProceedError(null)
     try {
-      await evaluateSubmission(id!)
-      navigate(`/submissions/${id}`)
+      await confirmCOPEReview(id!)
+      // Pass { fromReview: true } so SubmissionDetailPage knows not to immediately
+      // redirect back to /review (the enrich is async and status is still EXTRACTED).
+      navigate(`/submissions/${id}`, { state: { fromReview: true } })
     } catch {
       setProceedError('Failed to advance submission. Please try again.')
       setProceeding(false)
@@ -231,6 +233,7 @@ export default function CopeReviewPage() {
         <div>
           <Link
             to={`/submissions/${id}`}
+            state={{ skipRedirect: true }}
             className="inline-flex items-center gap-1 text-2xs text-uw-muted hover:text-uw-text mb-3 transition-colors"
           >
             <ChevronLeft size={12} />
