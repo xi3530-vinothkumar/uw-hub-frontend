@@ -153,16 +153,6 @@ export async function getEvents(id: string): Promise<SubmissionEvent[]> {
   return res.data
 }
 
-export async function getPerilExposures(id: string): Promise<PerilExposure[]> {
-  const res = await api.get<PerilExposure[]>(`/submissions/${id}/perils`)
-  return res.data
-}
-
-export async function getPhotoResults(id: string): Promise<PhotoResult[]> {
-  const res = await api.get<PhotoResult[]>(`/submissions/${id}/photos`)
-  return res.data
-}
-
 export async function extractSubmission(id: string): Promise<void> {
   await api.post(`/submissions/${id}/extract`)
 }
